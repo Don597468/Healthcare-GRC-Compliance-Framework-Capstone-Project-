@@ -1,0 +1,10 @@
+USER_ID,NAME,ROLE,VENDOR,SHARED_LOGIN,REMOTE_MFA_ENABLED,LAST_ACCESS_REVIEW_DATE
+alice.chen,Alice Chen,Registered Nurse,ReCloud Systems Inc.,No,Yes,2026-07-12
+ben.okafor,Ben Okafor,Registered Nurse,ReCloud Systems Inc.,No,Yes,2026-07-12
+david.kim,David Kim,Medical Records Clerk,ReCloud Systems Inc.,No,Yes,2026-07-12
+carla.diaz,Carla Diaz,Radiology Technician,SparkNet IT Services Ltd.,No,Yes,2026-07-12
+michael.torres,Michael Torres,Radiology Technician,SparkNet IT Services Ltd.,No,Yes,2026-07-12
+imaging-shared,Imaging Shared Login,Shared Imaging Workstation Login,SparkNet IT Services Ltd.,Yes,Yes,2026-07-12
+elena.petrova,Elena Petrova,ICU Nurse,Zark Device Corp.,No,Yes,2026-07-12
+henry.wu,Henry Wu,Clinical Technician,Zark Device Corp.,No,Yes,2026-07-12
+frank.miller,Frank Miller,ICU Nurse,Zark Device Corp.,No,Yes,2026-07-12
