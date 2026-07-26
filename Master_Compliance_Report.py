@@ -1,4 +1,5 @@
 """
+CS6495 Capstone Project - 2026
 GRC Compliance Master Report Generator
 
 This script reads raw evidence from Active Directory, Microsoft Intune, a server
