@@ -1,5 +1,6 @@
 """
-GRC Compliance Master Report Generator
+CS6495 Capstone Project 
+GRC Compliance Master Report 
 
 This script reads raw evidence from Active Directory, Microsoft Intune, a server
 inventory export, and vendor/supply-chain records, evaluates each
@@ -9,7 +10,7 @@ single Excel workbook with:
   1. Access Control             (Domain 1)
   2. Device Compliance          (Domains 2 & 5)
   3. Vendor & Incident Response (Domains 3 & 4)
-  4. Vendor Risk Summary        (aggregate score + risk rating per vendor)
+  4. Vendor Risk Summary        (Aggregate score + risk rating per vendor(Including the Internal - Hospital IT (Unmanaged) vendor))
 
 Inputs (same folder as this script):
   Access_Control_Users.csv
@@ -18,15 +19,11 @@ Inputs (same folder as this script):
   Vendor_Supply_Chain_and_Incident_Respone_Report.csv
 
 Output:
-  GRC_Compliance_Report.xlsx (saved here, in the git-tracked project folder)
-  A live copy is also auto-synced to ~/OneDrive/PowerBI-Data/ so Power BI's
-  Scheduled Refresh always has fresh data with no manual copy step.
+  GRC_Compliance_Report.xlsx
 """
 
 import math
 import re
-import shutil
-import os
 from collections import defaultdict
 from datetime import date
 
@@ -42,12 +39,6 @@ DEVICE_FILE = "Device_Compliance_Inventory.csv"
 SERVER_FILE = "server_inventory.csv"
 VENDOR_FILE = "Vendor_Supply_Chain_and_Incident_Respone_Report.csv"
 OUTPUT_FILE = "GRC_Compliance_Report.xlsx"
-
-# Live copy for Power BI: this folder is synced by OneDrive ONLY (no git),
-# so Power BI's Scheduled Refresh always has a fresh, non-git-conflicted
-# copy to read. Edit this path once to match your machine's OneDrive folder.
-POWERBI_LIVE_FOLDER = os.path.expanduser(r"~\OneDrive\PowerBI-Data")
-POWERBI_LIVE_FILE = os.path.join(POWERBI_LIVE_FOLDER, OUTPUT_FILE)
 
 FONT_NAME = "Aptos Narrow"
 FONT_SIZE = 14
@@ -410,18 +401,8 @@ def main():
     write_sheet(wb, "Vendor Risk Summary", risk_rows)
 
     wb.save(OUTPUT_FILE)
+
     print(f"Report saved to {OUTPUT_FILE}")
-
-    # Auto-copy to the OneDrive-only live folder so Power BI's Scheduled
-    # Refresh always picks up the latest data with zero manual steps.
-    try:
-        os.makedirs(POWERBI_LIVE_FOLDER, exist_ok=True)
-        shutil.copy2(OUTPUT_FILE, POWERBI_LIVE_FILE)
-        print(f"Live copy synced to {POWERBI_LIVE_FILE}")
-    except OSError as e:
-        print(f"WARNING: could not update the Power BI live copy ({e}). "
-              f"The git-tracked report was still saved successfully.")
-
     for row in risk_rows:
         print(f"  {row['Vendor Name']}: score {row['Aggregate Score']}, Risk Profile {row['Risk Rating']}")
 
