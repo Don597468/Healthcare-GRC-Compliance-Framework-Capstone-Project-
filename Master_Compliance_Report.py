@@ -1,6 +1,5 @@
 """
-CS6495 Capstone Project 
-GRC Compliance Master Report 
+GRC Compliance Master Report Generator
 
 This script reads raw evidence from Active Directory, Microsoft Intune, a server
 inventory export, and vendor/supply-chain records, evaluates each
@@ -10,7 +9,7 @@ single Excel workbook with:
   1. Access Control             (Domain 1)
   2. Device Compliance          (Domains 2 & 5)
   3. Vendor & Incident Response (Domains 3 & 4)
-  4. Vendor Risk Summary        (Aggregate score + risk rating per vendor(Including the Internal - Hospital IT (Unmanaged) vendor))
+  4. Vendor Risk Summary        (aggregate score + risk rating per vendor)
 
 Inputs (same folder as this script):
   Access_Control_Users.csv
@@ -19,11 +18,15 @@ Inputs (same folder as this script):
   Vendor_Supply_Chain_and_Incident_Respone_Report.csv
 
 Output:
-  GRC_Compliance_Report.xlsx
+  GRC_Compliance_Report.xlsx (saved here, in the git-tracked project folder)
+  A live copy is also auto-synced to the school OneDrive
+  (~/OneDrive - University of New Brunswick/PowerBI-Data/) so Power BI's
+  Scheduled Refresh always has fresh data with no manual copy step.
 """
 
 import math
 import re
+import os
 from collections import defaultdict
 from datetime import date
 
@@ -39,6 +42,14 @@ DEVICE_FILE = "Device_Compliance_Inventory.csv"
 SERVER_FILE = "server_inventory.csv"
 VENDOR_FILE = "Vendor_Supply_Chain_and_Incident_Respone_Report.csv"
 OUTPUT_FILE = "GRC_Compliance_Report.xlsx"
+
+# Live copy for Power BI: verified that the school OneDrive account
+# (unlike the personal Gmail-based one) syncs git's internal files cleanly,
+# so no separate folder is needed -- the git-tracked project folder itself
+# now lives inside OneDrive - University of New Brunswick, and Power BI can
+# read GRC_Compliance_Report.xlsx directly from that same location.
+POWERBI_LIVE_FOLDER = os.path.dirname(os.path.abspath(OUTPUT_FILE))
+POWERBI_LIVE_FILE = os.path.abspath(OUTPUT_FILE)
 
 FONT_NAME = "Aptos Narrow"
 FONT_SIZE = 14
@@ -401,8 +412,10 @@ def main():
     write_sheet(wb, "Vendor Risk Summary", risk_rows)
 
     wb.save(OUTPUT_FILE)
-
     print(f"Report saved to {OUTPUT_FILE}")
+
+    print(f"OneDrive will auto-sync this file for Power BI refresh: {POWERBI_LIVE_FILE}")
+
     for row in risk_rows:
         print(f"  {row['Vendor Name']}: score {row['Aggregate Score']}, Risk Profile {row['Risk Rating']}")
 
