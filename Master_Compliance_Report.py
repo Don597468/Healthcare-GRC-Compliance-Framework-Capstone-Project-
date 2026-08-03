@@ -1,10 +1,10 @@
 """
 GRC Compliance Master Report Generator
 
-This script reads raw evidence from Active Directory, Microsoft Intune, a server
-inventory export, and vendor/supply-chain records, evaluates each
-against the project's control matrix (Domains 1-5), and produces a
-single Excel workbook with:
+This Script reads raw evidence from Active Directory, Microsoft Intune, a server
+inventory export, and vendor/supply-chain records, checks each item
+against the project's control matrix (Domains 1-5), and produces one
+Excel workbook with:
 
   1. Access Control             (Domain 1)
   2. Device Compliance          (Domains 2 & 5)
@@ -18,17 +18,20 @@ Inputs (same folder as this script):
   Vendor_Supply_Chain_and_Incident_Respone_Report.csv
 
 Output:
-  GRC_Compliance_Report.xlsx (saved here, in the git-tracked project folder)
-  A live copy is also auto-synced to the school OneDrive
-  (~/OneDrive - University of New Brunswick/PowerBI-Data/) so Power BI's
-  Scheduled Refresh always has fresh data with no manual copy step.
+  GRC_Compliance_Report.xlsx
+
+After saving, the script also commits and pushes the workbook to
+GitHub automatically. Power BI Service reads the file straight from
+GitHub (see POWERBI_LIVE_SOURCE_NOTE) and refreshes on its own daily
+schedule, so the dashboard stays up to date with no manual steps.
 """
 
 import math
 import re
 import os
+import subprocess
 from collections import defaultdict
-from datetime import date
+from datetime import date, datetime
 
 import pandas as pd
 from openpyxl import Workbook
@@ -42,14 +45,18 @@ DEVICE_FILE = "Device_Compliance_Inventory.csv"
 SERVER_FILE = "server_inventory.csv"
 VENDOR_FILE = "Vendor_Supply_Chain_and_Incident_Respone_Report.csv"
 OUTPUT_FILE = "GRC_Compliance_Report.xlsx"
+LOG_FILE = "auto_push_log.txt"
 
-# Live copy for Power BI: verified that the school OneDrive account
-# (unlike the personal Gmail-based one) syncs git's internal files cleanly,
-# so no separate folder is needed -- the git-tracked project folder itself
-# now lives inside OneDrive - University of New Brunswick, and Power BI can
-# read GRC_Compliance_Report.xlsx directly from that same location.
-POWERBI_LIVE_FOLDER = os.path.dirname(os.path.abspath(OUTPUT_FILE))
-POWERBI_LIVE_FILE = os.path.abspath(OUTPUT_FILE)
+# Folder this script lives in -- also the git repo root
+PROJECT_FOLDER = os.path.dirname(os.path.abspath(__file__))
+
+# Power BI Service reads the workbook straight from GitHub through this
+# API URL instead of OneDrive/SharePoint (that route hit an auth wall
+# that needed an on-premises data gateway I didn't have set up).
+POWERBI_LIVE_SOURCE_NOTE = (
+    "https://api.github.com/repos/Don597468/Healthcare-GRC-Compliance-Framework"
+    "/contents/GRC_Compliance_Report.xlsx"
+)
 
 FONT_NAME = "Aptos Narrow"
 FONT_SIZE = 14
@@ -106,14 +113,69 @@ DEVICE_NOTES = {
 CONTROL_ID_PATTERN = re.compile(r"\b([A-Z]{2}-\d)\s+FAIL\b")
 
 # A vendor can only be held accountable for assets it actually manages.
-# The domain controller is internal hospital infrastructure (no vendor
-# manages it), and BEN-PC is a Personal-ownership BYOD device outside
-# any managed-service contract -- both still appear honestly in the
-# Device Compliance sheet, but neither counts against a vendor's score.
+# The domain controller is internal hospital infrastructure, and BEN-PC
+# is a personal BYOD device outside any managed-service contract --
+# both still show up on the Device Compliance sheet, but neither counts
+# against a vendor's risk score.
 RISK_ATTRIBUTION_OVERRIDE = {
     "EHR-DATABASE-SERVER": "Internal - Hospital IT (Unmanaged)",
     "BEN-PC": "Internal - Hospital IT (Unmanaged)",
 }
+
+
+def log(message):
+    """Print a line and also save it to the log file."""
+    line = f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] {message}"
+    print(line)
+    try:
+        with open(os.path.join(PROJECT_FOLDER, LOG_FILE), "a", encoding="utf-8") as f:
+            f.write(line + "\n")
+    except OSError:
+        pass
+
+
+def auto_push_to_github():
+    """Commit and push the updated report to GitHub."""
+    try:
+        subprocess.run(
+            ["git", "add", "."],
+            cwd=PROJECT_FOLDER, check=True,
+            capture_output=True, text=True, timeout=60,
+        )
+
+        commit_msg = f"Automated report update {datetime.now().strftime('%Y-%m-%d %H:%M UTC')}"
+        commit = subprocess.run(
+            ["git", "commit", "-m", commit_msg],
+            cwd=PROJECT_FOLDER, capture_output=True, text=True, timeout=60,
+        )
+        if commit.returncode != 0:
+            # git returns non-zero when there's nothing new to commit
+            if "nothing to commit" in (commit.stdout + commit.stderr).lower():
+                log("Git: no changes detected, nothing to commit/push.")
+                return "no-changes"
+            log(f"Git commit failed: {commit.stderr.strip()}")
+            return "commit-failed"
+
+        push = subprocess.run(
+            ["git", "push"],
+            cwd=PROJECT_FOLDER, capture_output=True, text=True, timeout=120,
+        )
+        if push.returncode != 0:
+            log(f"Git push failed: {push.stderr.strip()}")
+            return "push-failed"
+
+        log("Git: committed and pushed successfully.")
+        return "success"
+
+    except subprocess.TimeoutExpired:
+        log("Git operation timed out (network issue?).")
+        return "timeout"
+    except FileNotFoundError:
+        log("Git not found on PATH -- is it installed for this user?")
+        return "git-not-found"
+    except Exception as e:
+        log(f"Unexpected error during git push: {e}")
+        return "error"
 
 
 def build_access_control_rows():
@@ -411,13 +473,15 @@ def main():
     write_sheet(wb, "Vendor & Incident Response", vendor_rows)
     write_sheet(wb, "Vendor Risk Summary", risk_rows)
 
-    wb.save(OUTPUT_FILE)
-    print(f"Report saved to {OUTPUT_FILE}")
-
-    print(f"OneDrive will auto-sync this file for Power BI refresh: {POWERBI_LIVE_FILE}")
+    wb.save(os.path.join(PROJECT_FOLDER, OUTPUT_FILE))
+    log(f"Report saved to {OUTPUT_FILE}")
 
     for row in risk_rows:
-        print(f"  {row['Vendor Name']}: score {row['Aggregate Score']}, Risk Profile {row['Risk Rating']}")
+        log(f"  {row['Vendor Name']}: score {row['Aggregate Score']}, Risk Profile {row['Risk Rating']}")
+
+    status = auto_push_to_github()
+    log(f"Auto-push status: {status}")
+    log(f"Power BI reads this file live from: {POWERBI_LIVE_SOURCE_NOTE}")
 
 
 if __name__ == "__main__":
