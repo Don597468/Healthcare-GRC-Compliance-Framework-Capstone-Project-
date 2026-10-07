@@ -176,3 +176,16 @@
 [2026-10-04 23:16:29]   ReCloud Systems Inc.: score -5, Risk Profile LOW
 [2026-10-04 23:16:29]   SparkNet IT Services Ltd.: score -60, Risk Profile HIGH
 [2026-10-04 23:16:29]   Zark Device Corp.: score -25, Risk Profile MEDIUM
+[2026-10-04 23:16:36] Git push failed: remote: This repository moved. Please use the new location:        
+remote:   https://github.com/Don597468/Healthcare-GRC-Compliance-Framework-Capstone-Project-.git        
+error: RPC failed; curl 56 Recv failure: Connection was reset
+send-pack: unexpected disconnect while reading sideband packet
+fatal: the remote end hung up unexpectedly
+Everything up-to-date
+[2026-10-04 23:16:36] Auto-push status: push-failed
+[2026-10-04 23:16:36] Power BI reads this file live from: https://api.github.com/repos/Don597468/Healthcare-GRC-Compliance-Framework/contents/GRC_Compliance_Report.xlsx
+[2026-10-07 20:20:06] Report saved to GRC_Compliance_Report.xlsx
+[2026-10-07 20:20:06]   Internal - Hospital IT (Unmanaged): score -40, Risk Profile MEDIUM
+[2026-10-07 20:20:06]   ReCloud Systems Inc.: score -5, Risk Profile LOW
+[2026-10-07 20:20:06]   SparkNet IT Services Ltd.: score -60, Risk Profile HIGH
+[2026-10-07 20:20:06]   Zark Device Corp.: score -25, Risk Profile MEDIUM
