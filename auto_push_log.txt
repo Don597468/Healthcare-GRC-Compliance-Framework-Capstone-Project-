@@ -250,3 +250,8 @@ Everything up-to-date
 [2026-10-27 23:24:05]   ReCloud Systems Inc.: score -5, Risk Profile LOW
 [2026-10-27 23:24:05]   SparkNet IT Services Ltd.: score -60, Risk Profile HIGH
 [2026-10-27 23:24:05]   Zark Device Corp.: score -25, Risk Profile MEDIUM
+[2026-10-29 09:24:37] Report saved to GRC_Compliance_Report.xlsx
+[2026-10-29 09:24:37]   Internal - Hospital IT (Unmanaged): score -40, Risk Profile MEDIUM
+[2026-10-29 09:24:37]   ReCloud Systems Inc.: score -5, Risk Profile LOW
+[2026-10-29 09:24:37]   SparkNet IT Services Ltd.: score -60, Risk Profile HIGH
+[2026-10-29 09:24:37]   Zark Device Corp.: score -25, Risk Profile MEDIUM
