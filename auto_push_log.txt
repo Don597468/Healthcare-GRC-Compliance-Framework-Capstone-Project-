@@ -287,3 +287,11 @@ Everything up-to-date
 [2026-11-02 16:05:46]   ReCloud Systems Inc.: score -5, Risk Profile LOW
 [2026-11-02 16:05:46]   SparkNet IT Services Ltd.: score -60, Risk Profile HIGH
 [2026-11-02 16:05:46]   Zark Device Corp.: score -25, Risk Profile MEDIUM
+[2026-11-02 16:05:48] Git push failed: fatal: unable to access 'https://github.com/Don597468/Healthcare-GRC-Compliance-Framework.git/': Could not resolve host: github.com
+[2026-11-02 16:05:48] Auto-push status: push-failed
+[2026-11-02 16:05:48] Power BI reads this file live from: https://api.github.com/repos/Don597468/Healthcare-GRC-Compliance-Framework/contents/GRC_Compliance_Report.xlsx
+[2026-11-03 06:36:16] Report saved to GRC_Compliance_Report.xlsx
+[2026-11-03 06:36:16]   Internal - Hospital IT (Unmanaged): score -40, Risk Profile MEDIUM
+[2026-11-03 06:36:16]   ReCloud Systems Inc.: score -5, Risk Profile LOW
+[2026-11-03 06:36:16]   SparkNet IT Services Ltd.: score -60, Risk Profile HIGH
+[2026-11-03 06:36:16]   Zark Device Corp.: score -25, Risk Profile MEDIUM
